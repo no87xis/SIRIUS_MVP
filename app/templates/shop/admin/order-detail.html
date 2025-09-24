@@ -127,13 +127,7 @@
             <h2 class="text-xl font-semibold text-gray-900 mb-4">QR-код заказа</h2>
             
             <div class="flex flex-col sm:flex-row items-start sm:items-center space-y-4 sm:space-y-0 sm:space-x-6">
-                <div class="bg-white p-4 rounded-lg border shadow-sm">
-                    <img 
-                        src="{{ qr_service.get_qr_image_url(order) }}" 
-                        alt="QR-код заказа {{ order.order_code }}"
-                        class="w-40 h-40"
-                    />
-                </div>
+                
                 
                 <div class="flex-1 space-y-3">
                     <p class="text-sm text-gray-600">
@@ -141,33 +135,10 @@
                     </p>
                     
                     <div class="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-3">
-                        <button 
-                            onclick="downloadQR('{{ order.order_code }}', '{{ qr_service.get_qr_image_url(order) }}')"
-                            class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 transition-colors"
-                        >
-                            📥 Скачать QR-код
-                        </button>
                         
-                        <button 
-                            onclick="copyQRUrl('{{ qr_service.get_qr_public_url(order) }}')"
-                            class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition-colors"
-                        >
-                            📋 Копировать ссылку
-                        </button>
-                        
-                        <a 
-                            href="{{ qr_service.get_qr_public_url(order) }}"
-                            target="_blank"
-                            class="bg-purple-600 text-white px-4 py-2 rounded hover:bg-purple-700 transition-colors text-center"
-                        >
-                            🔗 Открыть публичную страницу
-                        </a>
                     </div>
                     
-                    <div class="text-xs text-gray-500">
-                        <p>QR-код содержит уникальную ссылку для доступа к заказу</p>
-                        <p>Ссылка: {{ qr_service.get_qr_public_url(order) }}</p>
-                    </div>
+                    
                 </div>
             </div>
         </div>

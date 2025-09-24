@@ -63,10 +63,7 @@ async def shop_admin_order_detail(
     if not order:
         raise HTTPException(status_code=404, detail="Заказ не найден")
     
-    # Генерируем QR-код если его нет
-    if not order.has_qr:
-        # MVP: QR-генерация отключена
-        pass
+    # QR функционал удалён
     
     return templates.TemplateResponse("shop/admin/order-detail.html", {
         "request": request,
@@ -88,32 +85,4 @@ async def shop_admin_reserve_order(
         return {"success": False, "message": f"Ошибка: {str(e)}"}
 
 
-# Роут для сканера QR-кодов (админка)
-@router.get("/qr-scanner", response_class=HTMLResponse)
-async def qr_scanner_page(request: Request):
-    """Страница сканера QR-кодов для менеджеров"""
-    return templates.TemplateResponse("shop/admin/qr-scanner.html", {
-        "request": request
-    })
-
-
-# API для обработки отсканированного QR-кода
-@router.post("/qr-scan")
-async def process_qr_scan(
-    request: Request,
-    qr_data: str = Form(...),
-    db: Session = Depends(get_db)
-):
-    """Обрабатывает отсканированный QR-код"""
-    try:
-        # Извлекаем токен из QR-данных
-        if qr_data.startswith('/o/'):
-            qr_token = qr_data[3:]  # Убираем '/o/'
-        else:
-            qr_token = qr_data
-        
-        # MVP: QR-функционал отключен
-        return {"success": False, "message": "QR-функционал отключен в MVP"}
-        
-    except Exception as e:
-        return {"success": False, "message": f"Ошибка: {str(e)}"}
+    # QR роуты удалены

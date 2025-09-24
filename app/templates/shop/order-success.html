@@ -27,7 +27,7 @@
                     <p><strong>Для получения товара вам понадобится:</strong></p>
                     <ul class="list-disc list-inside space-y-1 text-left max-w-2xl mx-auto">
                         <li><strong>Код заказа</strong> - покажите его на складе или курьеру</li>
-                        <li><strong>QR-код</strong> - отсканируйте при получении товара</li>
+                        
                         <li><strong>Документ с данными</strong> - паспорт или водительские права</li>
                     </ul>
                     <p class="mt-3 font-medium">📱 <strong>Сделайте скриншот этой страницы</strong> - это ваш чек на получение товара!</p>
@@ -84,38 +84,7 @@
                 </p>
             </div>
 
-            <!-- QR-код -->
-            {% if order.has_qr %}
-            <div class="bg-gray-50 rounded-lg p-4 mb-4">
-                <h3 class="text-base sm:text-lg font-medium text-gray-900 mb-3">QR-код заказа</h3>
-                <div class="flex flex-col items-center space-y-3">
-                    <div class="bg-white p-3 rounded-lg border">
-                        <img 
-                            src="{{ qr_service.get_qr_image_url(order) }}" 
-                            alt="QR-код заказа {{ order.order_code }}"
-                            class="w-24 h-24 sm:w-32 sm:h-32"
-                        />
-                    </div>
-                    <div class="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-3 w-full sm:w-auto">
-                        <button 
-                            onclick="downloadQR('{{ order.order_code }}', '{{ qr_service.get_qr_image_url(order) }}')"
-                            class="w-full sm:w-auto bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 transition-colors text-sm"
-                        >
-                            📥 Скачать QR-код
-                        </button>
-                        <button 
-                            onclick="shareQR('{{ order.order_code }}')"
-                            class="w-full sm:w-auto bg-purple-600 text-white px-4 py-2 rounded hover:bg-purple-700 transition-colors text-sm"
-                        >
-                            📤 Поделиться
-                        </button>
-                    </div>
-                </div>
-                <p class="text-xs sm:text-sm text-gray-600 mt-3 text-center sm:text-left">
-                    Сохраните QR-код — покажите его на складе для получения товара.
-                </p>
-            </div>
-            {% endif %}
+            
 
             <!-- Ссылка на заказ -->
             <div class="bg-blue-50 rounded-lg p-4 mb-4">
@@ -368,41 +337,12 @@
 </div>
 
 <script>
-// Функции для работы с QR-кодами
-
 function copyToClipboard(text) {
     navigator.clipboard.writeText(text).then(() => {
         showNotification('Скопировано в буфер обмена!', 'success');
     }).catch(() => {
         showNotification('Не удалось скопировать', 'error');
     });
-}
-
-function downloadQR(orderCode, qrUrl) {
-    const link = document.createElement('a');
-    link.href = qrUrl;
-    link.download = `qr-order-${orderCode}.png`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    showNotification('QR-код скачивается...', 'success');
-}
-
-function shareQR(orderCode) {
-    if (navigator.share) {
-        navigator.share({
-            title: `QR-код заказа ${orderCode}`,
-            text: `QR-код для получения заказа ${orderCode}`,
-            url: window.location.href
-        }).then(() => {
-            showNotification('Поделились успешно!', 'success');
-        }).catch(() => {
-            showNotification('Не удалось поделиться', 'error');
-        });
-    } else {
-        copyToClipboard(window.location.href);
-        showNotification('Ссылка скопирована в буфер обмена!', 'success');
-    }
 }
 
 function showNotification(message, type) {
