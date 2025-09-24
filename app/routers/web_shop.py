@@ -421,14 +421,5 @@ async def search_order_post(
         "phone": phone
     })
 
-# Публичный роут для доступа по QR-коду
-@router.get("/o/{qr_token}", response_class=HTMLResponse)
-async def public_order_view(
-    request: Request,
-    qr_token: str,
-    db: Session = Depends(get_db)
-):
-    """Публичный просмотр заказа по QR-токену (без авторизации)"""
-    # MVP: QR-функционал отключен
-    return RedirectResponse(url="/shop?info=QR-ссылки отключены в MVP", status_code=302)
+# QR-публичный доступ удалён
 

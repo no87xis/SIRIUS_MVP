@@ -59,6 +59,9 @@ def delete_user(db: Session, username: str) -> bool:
     db.commit()
     return True
 
+
+# ensure_default_admin удалён по запросу
+
 def get_user_statistics(db: Session) -> Dict[str, Any]:
     """Получить статистику по пользователям"""
     total_users = db.query(func.count(User.username)).scalar()

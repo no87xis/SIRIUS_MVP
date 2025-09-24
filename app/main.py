@@ -54,6 +54,7 @@ async def startup_event():
             ),
             timeout=settings.startup_timeout
         )
+        # Авто‑создание админа отключено по запросу
         
         # Ленивая загрузка роутеров
         routers = _import_routers()
@@ -127,7 +128,12 @@ async def health_check():
         # Быстрая проверка БД с таймаутом
         await asyncio.wait_for(
             asyncio.get_event_loop().run_in_executor(
-                None, lambda: engine.execute(text("SELECT 1"))
+                None,
+                lambda: (
+                    (lambda conn: (conn.execute(text("SELECT 1")), conn.close()))(
+                        engine.connect()
+                    )
+                )
             ),
             timeout=2.0  # 2 секунды таймаут
         )
