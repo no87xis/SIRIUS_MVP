@@ -1,0 +1,33 @@
+import asyncio
+from fastapi import FastAPI, Request, Depends
+from fastapi.staticfiles import StaticFiles
+from fastapi.templating import Jinja2Templates
+from starlette.middleware.sessions import SessionMiddleware
+from sqlalchemy.orm import Session
+from sqlalchemy import text
+from .config import settings
+from .db import engine, Base, get_db, close_db_connections
+from .services.auth import get_current_user_optional
+from .services.logger import logger
+
+# Ленивые импорты роутеров для быстрого старта (MVP: без QR)
+def _import_routers():
+    """Ленивый импорт роутеров"""
+    from .routers import (
+        web_public, web_products, web_orders, web_analytics, 
+        web_admin_panel, api, web_shop, shop_api, shop_admin, 
+        delivery_payment, delivery_notifications
+    )
+    return {
+        'web_public': web_public,
+        'web_products': web_products,
+        'web_orders': web_orders,
+        'web_analytics': web_analytics,
+        'web_admin_panel': web_admin_panel,
+        'api': api,
+        'web_shop': web_shop,
+        'shop_api': shop_api,
+        'shop_admin': shop_admin,
+        'delivery_payment': delivery_payment,
+        'delivery_notifications': delivery_notifications
+    }

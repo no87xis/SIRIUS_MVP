@@ -1,0 +1,44 @@
+🚨 РУЧНОЕ ИСПРАВЛЕНИЕ ПРЕФИКСА "qс"
+
+ПРОБЛЕМА: Пакет qrcode вызывает префикс "qс" во всех командах
+
+РЕШЕНИЕ:
+
+1. ОТКРОЙТЕ ОБЫЧНЫЙ CMD (не PowerShell в Cursor)
+2. ПЕРЕЙДИТЕ В ПАПКУ: cd /d D:\SIRIUS
+3. ВЫПОЛНИТЕ КОМАНДЫ:
+
+# Поиск Python
+where python
+# или
+dir "C:\Program Files\Python*" /s /b | findstr python.exe
+
+# Удаление qrcode (замените путь на ваш)
+"C:\Program Files\Python311\python.exe" -m pip uninstall qrcode -y
+"C:\Program Files\Python311\python.exe" -m pip uninstall "qrcode[pil]" -y
+
+# Очистка кэша
+"C:\Program Files\Python311\python.exe" -m pip cache purge
+
+# Проверка переменных
+echo %PATH%
+echo %PATH% | findstr qс
+
+# Если найден "qс" в PATH, очистите вручную:
+# 1. Откройте "Переменные среды" (sysdm.cpl)
+# 2. Найдите PATH
+# 3. Удалите все записи содержащие "qс"
+
+# Удаление профилей PowerShell
+del "%USERPROFILE%\Documents\WindowsPowerShell\Microsoft.PowerShell_profile.ps1"
+del "%USERPROFILE%\Documents\PowerShell\Microsoft.PowerShell_profile.ps1"
+
+4. ЗАКРОЙТЕ ВСЕ ТЕРМИНАЛЫ
+5. ПЕРЕЗАПУСТИТЕ CURSOR
+6. ПРОВЕРЬТЕ: echo ok, python --version
+
+ЕСЛИ НЕ ПОМОГАЕТ:
+- Перезагрузите компьютер
+- Переустановите Cursor
+- Проверьте антивирус
+

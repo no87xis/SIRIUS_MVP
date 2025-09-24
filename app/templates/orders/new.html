@@ -1,0 +1,419 @@
+{% extends "base.html" %}
+
+{% block title %}Новый заказ - Сириус{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <div class="max-w-2xl mx-auto">
+        <div class="flex items-center justify-between mb-6">
+            <div class="flex items-center">
+                <a href="/orders" class="text-blue-600 hover:text-blue-800 mr-4">
+                    ← Назад к заказам
+                </a>
+                <h1 class="text-3xl font-bold text-gray-900">Новый заказ</h1>
+            </div>
+            <a href="/qr-scanner" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded inline-flex items-center">
+                📷 QR-сканер
+            </a>
+        </div>
+
+        {% include "_flash.html" %}
+
+        <div class="bg-white rounded-lg shadow p-6">
+            <!-- Информация о заказе -->
+            <div class="mb-6 p-4 bg-blue-50 rounded-lg">
+                <h3 class="text-lg font-medium text-blue-900 mb-2">Информация о заказе</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-blue-700 mb-1">Код заказа</label>
+                        <div class="text-2xl font-mono font-bold text-blue-600 bg-white px-3 py-2 rounded border">
+                            <span id="order_code_display">Будет сгенерирован автоматически</span>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-blue-700 mb-1">Статус</label>
+                        <div class="text-lg font-medium text-green-600 bg-white px-3 py-2 rounded border">
+                            Новый заказ
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <form method="POST" action="/orders" class="space-y-6">
+                <!-- Информация о клиенте -->
+                <div>
+                    <h3 class="text-lg font-medium text-gray-900 mb-4">Информация о клиенте</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                                 <div>
+                            <label for="phone" class="block text-sm font-medium text-gray-700 mb-1">
+                                Номер телефона
+                            </label>
+                            <input type="tel" name="phone" id="phone"
+                                   class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                   placeholder="+7 (999) 123-45-67" value="+7">
+                            <p class="text-sm text-gray-500 mt-1">Формат: +7 (XXX) XXX-XX-XX</p>
+                        </div>
+                        <div>
+                            <label for="customer_name" class="block text-sm font-medium text-gray-700 mb-1">
+                                Имя клиента
+                            </label>
+                            <input type="text" name="customer_name" id="customer_name"
+                                   class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                   placeholder="Иван Иванов">
+                        </div>
+                        <div>
+                            <label for="client_city" class="block text-sm font-medium text-gray-700 mb-1">
+                                Город клиента
+                            </label>
+                            <select name="client_city" id="client_city" 
+                                    class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                <option value="">Выберите город</option>
+                                <option value="Грозный">Грозный</option>
+                                <option value="Махачкала">Махачкала</option>
+                                <option value="Хасавюрт">Хасавюрт</option>
+                                <option value="custom">Другой</option>
+                            </select>
+                            <input type="text" name="client_city_custom" id="client_city_custom"
+                                   class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 mt-2 hidden"
+                                   placeholder="Введите название города">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Информация о товаре -->
+                <div>
+                    <h3 class="text-lg font-medium text-gray-900 mb-4">Информация о товаре</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div>
+                            <label for="product_id" class="block text-sm font-medium text-gray-700 mb-1">
+                                Товар *
+                            </label>
+                            <select name="product_id" id="product_id" required
+                                    class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                <option value="">Выберите товар</option>
+                                {% for product in products %}
+                                <option value="{{ product.id }}" 
+                                        data-price="{{ product.sell_price_rub or 0 }}"
+                                        data-stock="{{ product.stock }}">
+                                    {{ product.name }} (остаток: {{ product.stock }})
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div>
+                            <label for="qty" class="block text-sm font-medium text-gray-700 mb-1">
+                                Количество *
+                            </label>
+                            <input type="number" name="qty" id="qty" min="1" required
+                                   class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                   placeholder="1" value="1">
+                        </div>
+                        <div>
+                            <label for="unit_price_rub" class="block text-sm font-medium text-gray-700 mb-1">
+                                Цена за единицу (₽) *
+                            </label>
+                            <input type="number" name="unit_price_rub" id="unit_price_rub" step="0.01" min="0" required
+                                   class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                   placeholder="0.00">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Курс евро и способ оплаты -->
+                <div>
+                    <h3 class="text-lg font-medium text-gray-900 mb-4">Курс евро и оплата</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label for="eur_rate" class="block text-sm font-medium text-gray-700 mb-1">
+                                Курс евро (₽) *
+                            </label>
+                            <input type="number" name="eur_rate" id="eur_rate" step="0.0001" min="0" required
+                                   class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                   placeholder="90.0000" value="{{ "%.4f"|format(last_eur_rate) }}">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">
+                                Статус оплаты *
+                            </label>
+                            <div class="flex gap-2">
+                                <button type="button" id="payment_paid" name="payment_status" value="paid"
+                                        class="flex-1 py-2 px-4 border border-gray-300 rounded-md text-sm font-medium transition-all duration-200 payment-status-btn"
+                                        data-status="paid">
+                                    💰 Оплачено
+                                </button>
+                                <button type="button" id="payment_unpaid" name="payment_status" value="unpaid"
+                                        class="flex-1 py-2 px-4 border border-gray-300 rounded-md text-sm font-medium transition-all duration-200 payment-status-btn active"
+                                        data-status="unpaid">
+                                    ❌ Не оплачено
+                                </button>
+                            </div>
+                            <input type="hidden" name="payment_method" id="payment_method" value="unpaid" required>
+                        </div>
+                        <div>
+                            <label for="payment_method_id" class="block text-sm font-medium text-gray-700 mb-1">
+                                Способ оплаты:
+                            </label>
+                            <select name="payment_method_id" id="payment_method_id"
+                                    class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                <option value="">Выберите способ оплаты</option>
+                                <option value="1">Перевод по СБП +1%</option>
+                                <option value="2">Наличными на складе в Грозном</option>
+                                <option value="3">Наличными в кассу в Махачкале</option>
+                                <option value="4">Наличными в кассу в Назране</option>
+                                <option value="5">Наличными в кассу в Хасавюрте</option>
+                                <option value="6">Оплата по б/н на р/с ИП +7%</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div id="payment_note_container" class="mt-4 hidden">
+                        <label for="payment_note" class="block text-sm font-medium text-gray-700 mb-1">
+                            Примечание к оплате
+                        </label>
+                        <input type="text" name="payment_note" id="payment_note"
+                               class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                               placeholder="Укажите способ оплаты">
+                    </div>
+                </div>
+                    </div>
+                </div>
+
+                <!-- Предварительный расчет -->
+                <div class="bg-gray-50 p-4 rounded-lg">
+                    <h4 class="text-sm font-medium text-gray-700 mb-2">Предварительный расчет</h4>
+                    <div class="grid grid-cols-2 gap-4 text-sm">
+                        <div>
+                            <span class="text-gray-600">Количество:</span>
+                            <span id="calc_qty" class="font-medium ml-2">0</span>
+                        </div>
+                        <div>
+                            <span class="text-gray-600">Цена за единицу:</span>
+                            <span id="calc_price" class="font-medium ml-2">0.00 ₽</span>
+                        </div>
+                        <div class="col-span-2">
+                            <span class="text-gray-600">Общая сумма:</span>
+                            <span id="calc_total" class="font-medium ml-2 text-lg text-blue-600">0.00 ₽</span>
+                        </div>
+                        <div class="col-span-2">
+                            <span id="commission_info" class="text-sm text-orange-600 font-medium hidden"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Кнопки -->
+                <div class="flex justify-end space-x-4">
+                    <a href="/orders" class="bg-gray-500 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded">
+                        Отмена
+                    </a>
+                    <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+                        Создать заказ
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<style>
+.payment-status-btn {
+    background-color: #f3f4f6;
+    color: #374151;
+    border-color: #d1d5db;
+}
+
+.payment-status-btn:hover {
+    background-color: #e5e7eb;
+    border-color: #9ca3af;
+}
+
+.payment-status-btn.active {
+    background-color: #3b82f6;
+    color: white;
+    border-color: #2563eb;
+    box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.1), 0 2px 4px -1px rgba(59, 130, 246, 0.06);
+}
+
+.payment-status-btn.active:hover {
+    background-color: #2563eb;
+    border-color: #1d4ed8;
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const productSelect = document.getElementById('product_id');
+    const qtyInput = document.getElementById('qty');
+    const priceInput = document.getElementById('unit_price_rub');
+    
+    const calcQty = document.getElementById('calc_qty');
+    const calcPrice = document.getElementById('calc_price');
+    const calcTotal = document.getElementById('calc_total');
+
+    function updateCalculation() {
+        const qty = parseInt(qtyInput.value) || 0;
+        const price = parseFloat(priceInput.value) || 0;
+        const paymentMethod = document.getElementById('payment_method_id').value;
+        
+        let finalPrice = price;
+        let commission = 0;
+        
+        // Применяем комиссию в зависимости от способа оплаты
+        if (paymentMethod === '1') { // СБП +1%
+            commission = price * 0.01;
+            finalPrice = price + commission;
+        } else if (paymentMethod === '6') { // р/с ИП +7%
+            commission = price * 0.07;
+            finalPrice = price + commission;
+        }
+        
+        const total = qty * finalPrice;
+
+        calcQty.textContent = qty;
+        calcPrice.textContent = finalPrice.toFixed(2) + ' ₽';
+        calcTotal.textContent = total.toFixed(2) + ' ₽';
+        
+        // Показываем комиссию если есть
+        if (commission > 0) {
+            const commissionText = paymentMethod === '1' ? 'СБП +1%' : 'р/с ИП +7%';
+            document.getElementById('commission_info').textContent = `Комиссия ${commissionText}: +${commission.toFixed(2)} ₽`;
+            document.getElementById('commission_info').classList.remove('hidden');
+        } else {
+            document.getElementById('commission_info').classList.add('hidden');
+        }
+    }
+
+    function updatePriceFromProduct() {
+        const selectedOption = productSelect.options[productSelect.selectedIndex];
+        if (selectedOption && selectedOption.dataset.price) {
+            const price = parseFloat(selectedOption.dataset.price);
+            priceInput.value = price.toFixed(2);
+            updateCalculation();
+        }
+    }
+
+    productSelect.addEventListener('change', updatePriceFromProduct);
+    qtyInput.addEventListener('input', updateCalculation);
+    priceInput.addEventListener('input', updateCalculation);
+    
+    // Обработчик изменения способа оплаты для пересчета комиссии
+    document.getElementById('payment_method_id').addEventListener('change', updateCalculation);
+
+    // Обработка статуса оплаты (кнопки)
+    const paymentPaidBtn = document.getElementById('payment_paid');
+    const paymentUnpaidBtn = document.getElementById('payment_unpaid');
+    const paymentMethodHidden = document.getElementById('payment_method');
+    
+    function setPaymentStatus(status) {
+        // Убираем активный класс со всех кнопок
+        paymentPaidBtn.classList.remove('active');
+        paymentUnpaidBtn.classList.remove('active');
+        
+        // Добавляем активный класс к выбранной кнопке
+        if (status === 'paid') {
+            paymentPaidBtn.classList.add('active');
+            paymentMethodHidden.value = 'paid';
+        } else {
+            paymentUnpaidBtn.classList.add('active');
+            paymentMethodHidden.value = 'unpaid';
+        }
+    }
+    
+    paymentPaidBtn.addEventListener('click', () => setPaymentStatus('paid'));
+    paymentUnpaidBtn.addEventListener('click', () => setPaymentStatus('unpaid'));
+    
+    // Обработка выбора города
+    const citySelect = document.getElementById('client_city');
+    const cityCustomInput = document.getElementById('client_city_custom');
+    
+    citySelect.addEventListener('change', function() {
+        if (this.value === 'custom') {
+            cityCustomInput.classList.remove('hidden');
+            cityCustomInput.required = true;
+        } else {
+            cityCustomInput.classList.add('hidden');
+            cityCustomInput.required = false;
+            cityCustomInput.value = '';
+        }
+    });
+    
+    // Маска для телефона
+    const phoneInput = document.getElementById('phone');
+    
+    phoneInput.addEventListener('input', function(e) {
+        let value = e.target.value.replace(/\D/g, '');
+        
+        // Убираем +7 из начала если есть
+        if (value.startsWith('7')) {
+            value = value.substring(1);
+        }
+        
+        // Ограничиваем длину
+        if (value.length > 10) {
+            value = value.substring(0, 10);
+        }
+        
+        // Форматируем номер
+        let formatted = '+7';
+        if (value.length > 0) {
+            formatted += ' (' + value.substring(0, 3);
+            if (value.length > 3) {
+                formatted += ') ' + value.substring(3, 6);
+                if (value.length > 6) {
+                    formatted += '-' + value.substring(6, 8);
+                    if (value.length > 8) {
+                        formatted += '-' + value.substring(8, 10);
+                    }
+                }
+            }
+        }
+        
+        e.target.value = formatted;
+    });
+    
+    // Устанавливаем начальное значение
+    phoneInput.value = '+7';
+    
+    // Обработка способа оплаты (старый код для совместимости)
+    const paymentMethodSelect = document.getElementById('payment_method');
+    const paymentNoteContainer = document.getElementById('payment_note_container');
+    
+    paymentMethodSelect.addEventListener('change', function() {
+        if (this.value === 'other') {
+            paymentNoteContainer.classList.remove('hidden');
+        } else {
+            paymentNoteContainer.classList.add('hidden');
+        }
+    });
+
+    // Инициализация
+    updateCalculation();
+    
+    // Генерация кода заказа при загрузке страницы
+    const code = generateOrderCode();
+    document.getElementById('order_code_display').textContent = code;
+    
+    // Добавляем класс для анимации
+    document.getElementById('order_code_display').classList.add('animate-pulse');
+    
+    // Убираем анимацию через 2 секунды
+    setTimeout(() => {
+        document.getElementById('order_code_display').classList.remove('animate-pulse');
+    }, 2000);
+});
+
+function generateOrderCode() {
+    // Генерируем 3 буквы (строчные)
+    const letters = 'abcdefghijklmnopqrstuvwxyz';
+    let result = '';
+    for (let i = 0; i < 3; i++) {
+        result += letters.charAt(Math.floor(Math.random() * letters.length));
+    }
+    
+    // Добавляем 5 цифр
+    for (let i = 0; i < 5; i++) {
+        result += Math.floor(Math.random() * 10);
+    }
+    
+    return result;
+}
+</script>
+{% endblock %}

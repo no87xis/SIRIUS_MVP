@@ -1,0 +1,316 @@
+{% extends "base.html" %}
+
+{% block title %}Редактирование товара - Сириус{% endblock %}
+
+{% block content %}
+<div class="px-4 sm:px-6 lg:px-8">
+    <div class="max-w-3xl mx-auto">
+        <!-- Заголовок -->
+        <div class="mb-8">
+            <div class="flex items-center justify-between">
+                <div>
+                    <h1 class="text-3xl font-bold text-gray-900">Редактирование товара</h1>
+                    <p class="mt-2 text-sm text-gray-700">
+                        Измените информацию о товаре "{{ product.name }}"
+                    </p>
+                </div>
+                <a href="/products/{{ product.id }}" class="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-sirius-blue">
+                    <svg class="-ml-1 mr-2 h-5 w-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+                    </svg>
+                    Назад к товару
+                </a>
+            </div>
+        </div>
+
+        <!-- Форма редактирования товара -->
+        <div class="bg-white shadow sm:rounded-lg">
+            <div class="px-4 py-5 sm:p-6">
+                <form method="POST" action="/products/{{ product.id }}" class="space-y-6" enctype="multipart/form-data">
+
+                    
+                    <!-- Основная информация -->
+                    <div>
+                        <h3 class="text-lg font-medium text-gray-900 mb-4">Основная информация</h3>
+                        <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
+                            <div class="sm:col-span-2">
+                                <label for="name" class="block text-sm font-medium text-gray-700">
+                                    Название товара *
+                                </label>
+                                <input type="text" name="name" id="name" required
+                                       value="{{ product.name }}"
+                                       class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-sirius-blue focus:border-sirius-blue sm:text-sm"
+                                       placeholder="Введите название товара">
+                            </div>
+
+                            <div class="sm:col-span-2">
+                                <label for="description" class="block text-sm font-medium text-gray-700">
+                                    Описание
+                                </label>
+                                <textarea name="description" id="description" rows="3"
+                                          class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-sirius-blue focus:border-sirius-blue sm:text-sm"
+                                          placeholder="Краткое описание товара">{{ product.description or '' }}</textarea>
+                            </div>
+                            
+                            <div class="sm:col-span-2">
+                                <label for="detailed_description" class="block text-sm font-medium text-gray-700">
+                                    Подробное описание для магазина
+                                </label>
+                                <textarea name="detailed_description" id="detailed_description" rows="4"
+                                          class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-sirius-blue focus:border-sirius-blue sm:text-sm"
+                                          placeholder="Подробное описание товара для клиентов магазина">{{ product.detailed_description or '' }}</textarea>
+                                <p class="mt-1 text-xs text-gray-500">Это описание будет видно клиентам в магазине</p>
+                            </div>
+
+                            <div>
+                                <label for="supplier_name" class="block text-sm font-medium text-gray-700">
+                                    Поставщик
+                                </label>
+                                <input type="text" name="supplier_name" id="supplier_name"
+                                       value="{{ product.supplier_name or '' }}"
+                                       class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-sirius-blue focus:border-sirius-blue sm:text-sm"
+                                       placeholder="Название поставщика">
+                            </div>
+
+                            <div>
+                                <label for="quantity" class="block text-sm font-medium text-gray-700">
+                                    Остаток (ручное изменение)
+                                </label>
+                                <input type="number" name="quantity" id="quantity" min="0"
+                                       value="{{ product.quantity }}"
+                                       class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-sirius-blue focus:border-sirius-blue sm:text-sm"
+                                       placeholder="0">
+                                <p class="mt-1 text-xs text-gray-500">Текущий остаток: {{ product.stock }} из {{ product.quantity }}</p>
+                            </div>
+
+                            <div>
+                                <label for="availability_status" class="block text-sm font-medium text-gray-700">
+                                    Статус наличия
+                                </label>
+                                <select name="availability_status" id="availability_status"
+                                        class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-sirius-blue focus:border-sirius-blue sm:text-sm"
+                                        required>
+                                     <option value="IN_STOCK" {% if product.availability_status == 'IN_STOCK' %}selected{% endif %}>В наличии</option>
+                                     <option value="IN_TRANSIT" {% if product.availability_status == 'IN_TRANSIT' %}selected{% endif %}>В пути</option>
+                                     <option value="ON_ORDER" {% if product.availability_status == 'ON_ORDER' %}selected{% endif %}>Под заказ</option>
+                                     <option value="OUT_OF_STOCK" {% if product.availability_status == 'OUT_OF_STOCK' %}selected{% endif %}>Нет в наличии</option>
+                                </select>
+                                <p class="mt-1 text-xs text-gray-500">Статус для отображения в магазине</p>
+                            </div>
+
+                            <div>
+                                <label for="expected_date" class="block text-sm font-medium text-gray-700">
+                                    Ожидаемая дата поступления
+                                </label>
+                                <input type="date" name="expected_date" id="expected_date"
+                                       value="{{ product.expected_date.strftime('%Y-%m-%d') if product.expected_date else '' }}"
+                                       class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-sirius-blue focus:border-sirius-blue sm:text-sm">
+                                <p class="mt-1 text-xs text-gray-500">Дата, когда товар поступит на склад</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Цены и остатки -->
+                    <div>
+                        <h3 class="text-lg font-medium text-gray-900 mb-4">Цены и остатки</h3>
+                        <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
+                            <div>
+                                <label for="buy_price_eur" class="block text-sm font-medium text-gray-700">
+                                    Цена закупки (€)
+                                </label>
+                                <div class="mt-1 relative rounded-md shadow-sm">
+                                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                        <span class="text-gray-500 sm:text-sm">€</span>
+                                    </div>
+                                    <input type="number" name="buy_price_eur" id="buy_price_eur" step="0.01" min="0"
+                                           value="{{ product.buy_price_eur or '' }}"
+                                           class="pl-7 block w-full border-gray-300 rounded-md shadow-sm focus:ring-sirius-blue focus:border-sirius-blue sm:text-sm"
+                                           placeholder="0.00">
+                                </div>
+                            </div>
+
+                            <div>
+                                <label for="sell_price_rub" class="block text-sm font-medium text-gray-700">
+                                    Цена продажи (₽)
+                                </label>
+                                <div class="mt-1 relative rounded-md shadow-sm">
+                                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                        <span class="text-gray-500 sm:text-sm">₽</span>
+                                    </div>
+                                    <input type="number" name="sell_price_rub" id="sell_price_rub" step="0.01" min="0"
+                                           value="{{ product.sell_price_rub or '' }}"
+                                           class="pl-7 block w-full border-gray-300 rounded-md shadow-sm focus:ring-sirius-blue focus:border-sirius-blue sm:text-sm"
+                                           placeholder="0.00">
+                                </div>
+                            </div>
+
+                            <div>
+                                <label for="min_stock" class="block text-sm font-medium text-gray-700">
+                                    Минимальный остаток
+                                </label>
+                                <input type="number" name="min_stock" id="min_stock" value="{{ product.min_stock }}" min="0"
+                                       class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-sirius-blue focus:border-sirius-blue sm:text-sm">
+                                <p class="mt-1 text-xs text-gray-500">При достижении этого количества будет показано предупреждение</p>
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700">
+                                    Статус остатка
+                                </label>
+                                <div class="mt-1 p-3 rounded-md {% if product.is_low_stock %}bg-red-50 border border-red-200{% else %}bg-green-50 border border-green-200{% endif %}">
+                                    <div class="flex items-center">
+                                        {% if product.is_low_stock %}
+                                        <svg class="h-5 w-5 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
+                                        </svg>
+                                        <span class="ml-2 text-sm font-medium text-red-800">Низкий остаток</span>
+                                        {% else %}
+                                        <svg class="h-5 w-5 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                        </svg>
+                                        <span class="ml-2 text-sm font-medium text-green-800">Остаток в норме</span>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Управление фотографиями -->
+                    <div>
+                        <h3 class="text-lg font-medium text-gray-900 mb-4">Фотографии товара</h3>
+                        
+                        <!-- Текущие фотографии -->
+                        {% if product.photos %}
+                        <div class="mb-4">
+                            <h4 class="text-sm font-medium text-gray-700 mb-2">Текущие фотографии:</h4>
+                            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                                {% for photo in product.photos %}
+                                <div class="relative group">
+                                    <img src="/static/{{ photo.file_path.replace('app/static/', '') }}" 
+                                         alt="Фото товара" 
+                                         class="w-full h-24 object-cover rounded-lg border border-gray-200">
+                                    <div class="absolute inset-0 bg-black bg-opacity-50 opacity-0 group-hover:opacity-100 transition-opacity rounded-lg flex items-center justify-center">
+                                        <button type="button" 
+                                                onclick="deletePhoto({{ photo.id }})"
+                                                class="bg-red-600 text-white p-2 rounded-full hover:bg-red-700">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                                            </svg>
+                                        </button>
+                                    </div>
+                                    {% if photo.is_main %}
+                                    <div class="absolute top-1 left-1 bg-blue-600 text-white text-xs px-2 py-1 rounded">
+                                        Главная
+                                    </div>
+                                    {% endif %}
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        {% endif %}
+
+                        <!-- Загрузка новых фотографий -->
+                        <div>
+                            <label for="new_photos" class="block text-sm font-medium text-gray-700 mb-2">
+                                Добавить новые фотографии
+                            </label>
+                            <input type="file" name="new_photos" id="new_photos" accept="image/*" multiple
+                                   class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-sirius-blue focus:border-sirius-blue sm:text-sm">
+                            <p class="mt-1 text-xs text-gray-500">
+                                Выберите одну или несколько фотографий. Первая загруженная будет главной.
+                            </p>
+                        </div>
+
+                        <!-- Инструкции по фотографиям -->
+                        <div class="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-md">
+                            <div class="flex">
+                                <svg class="h-5 w-5 text-blue-400 mt-0.5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                </svg>
+                                <div class="text-sm text-blue-700">
+                                    <p class="font-medium">Советы по фотографиям:</p>
+                                    <ul class="mt-1 list-disc list-inside space-y-1">
+                                        <li>Используйте качественные изображения</li>
+                                        <li>Первая загруженная фотография станет главной</li>
+                                        <li>Можно загружать до 6 фотографий на товар</li>
+                                        <li>Поддерживаемые форматы: JPG, PNG, GIF</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Кнопки действий -->
+                    <div class="flex justify-end space-x-3 pt-6 border-t border-gray-200">
+                        <a href="/products/{{ product.id }}" class="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-sirius-blue">
+                            Отмена
+                        </a>
+                        <button type="submit" class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-sirius-blue hover:bg-sirius-indigo focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-sirius-blue">
+                            <svg class="-ml-1 mr-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                            </svg>
+                            Сохранить изменения
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function deletePhoto(photoId) {
+    if (confirm('Вы уверены, что хотите удалить эту фотографию?')) {
+        fetch(`/api/photos/${photoId}`, {
+            method: 'DELETE',
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Перезагружаем страницу для обновления списка фотографий
+                location.reload();
+            } else {
+                alert('Ошибка при удалении фотографии: ' + data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Произошла ошибка при удалении фотографии');
+        });
+    }
+}
+
+// Функция для отправки формы
+function submitForm() {
+    const form = document.querySelector('form');
+    if (form) {
+        form.submit();
+    }
+}
+
+// Управление статусом и датой поставки
+document.addEventListener('DOMContentLoaded', function() {
+    const availabilityStatus = document.getElementById('availability_status');
+    const expectedDate = document.getElementById('expected_date');
+    
+    if (availabilityStatus && expectedDate) {
+        availabilityStatus.addEventListener('change', function() {
+            if (this.value === 'IN_STOCK') {
+                expectedDate.value = '';
+                expectedDate.disabled = true;
+            } else {
+                expectedDate.disabled = false;
+            }
+            
+
+        });
+        
+        // Инициализация при загрузке
+        if (availabilityStatus.value === 'IN_STOCK') {
+            expectedDate.disabled = true;
+        }
+    }
+});
+</script>
+{% endblock %}

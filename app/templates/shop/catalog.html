@@ -1,0 +1,188 @@
+{% extends "shop/base.html" %}
+
+{% block title %}Sirius Group{% endblock %}
+
+{% block content %}
+<div class="px-4 sm:px-6 lg:px-8 py-4 sm:py-8">
+    <!-- Фильтры и сортировка -->
+    <div class="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-3 sm:space-y-0">
+        <div class="flex gap-2">
+            <!-- Кнопки фильтрации будут добавлены через JavaScript -->
+        </div>
+        
+        <div class="text-sm text-gray-600">
+            Найдено товаров: <span id="products-count" class="font-medium">{{ products|length }}</span>
+        </div>
+    </div>
+
+    <!-- Сетка товаров -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
+        {% for product in products %}
+        <div class="product-card bg-white rounded-lg shadow-md overflow-hidden">
+            <!-- Фото товара -->
+            <a href="/shop/product/{{ product.id }}" class="block">
+                <div class="w-full overflow-hidden">
+                {% if product.main_photo %}
+                <img src="/static/{{ product.main_photo.file_path.replace('app/static/', '') }}" 
+                     alt="{{ product.name }}"
+                     class="w-full h-32 sm:h-48 object-contain transition-transform duration-300 hover:scale-105"
+                     onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                <div class="w-full h-32 sm:h-48 bg-gray-200 flex items-center justify-center" style="display: none;">
+                    <div class="text-center">
+                        <i class="fas fa-image text-gray-400 text-2xl sm:text-4xl mb-2"></i>
+                        <p class="text-gray-500 text-xs sm:text-sm">Фото недоступно</p>
+                    </div>
+                </div>
+                {% else %}
+                <div class="w-full h-32 sm:h-48 bg-gray-200 flex items-center justify-center">
+                    <div class="text-center">
+                        <i class="fas fa-image text-gray-400 text-2xl sm:text-4xl mb-2"></i>
+                        <p class="text-gray-500 text-xs sm:text-sm">Нет фото</p>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+            </a>
+            
+            <!-- Информация о товаре -->
+            <div class="p-3 sm:p-4">
+                <h3 class="text-base sm:text-lg font-semibold text-gray-900 mb-2 line-clamp-2">
+                    <a href="/shop/product/{{ product.id }}" class="hover:text-blue-600">
+                        {{ product.name }}
+                    </a>
+                </h3>
+                
+                <!-- Статус наличия -->
+                <div class="mb-3">
+                    {% if product.availability_status == 'ON_ORDER' %}
+                        <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800" data-status="on_order">
+                            <i class="fas fa-clock mr-1"></i>
+                            Под заказ
+                        </span>
+                    {% elif product.availability_status == 'IN_TRANSIT' %}
+                        <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800" data-status="in_transit">
+                            <i class="fas fa-truck mr-1"></i>
+                            В пути
+                        </span>
+                    {% elif product.availability_status == 'IN_STOCK' and product.quantity > 0 %}
+                        <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800" data-status="in_stock">
+                            <i class="fas fa-check-circle mr-1"></i>
+                            В наличии
+                        </span>
+                    {% else %}
+                        <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800" data-status="out_of_stock">
+                            <i class="fas fa-times-circle mr-1"></i>
+                            Нет в наличии
+                        </span>
+                    {% endif %}
+                </div>
+                
+                <!-- Цена -->
+                <div class="mb-3 sm:mb-4">
+                    {% if product.sell_price_rub %}
+                    <p class="text-lg sm:text-2xl font-bold text-blue-600">
+                        {{ "%.2f"|format(product.sell_price_rub) }} ₽
+                    </p>
+                    {% else %}
+                    <p class="text-sm sm:text-lg text-gray-500">Цена по запросу</p>
+                    {% endif %}
+                </div>
+
+                <!-- Кнопка добавления в корзину -->
+                <div class="flex justify-center">
+                    <button onclick="addToCart({{ product.id }}, this)" 
+                            class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-md transition-colors text-sm sm:text-base">
+                        <i class="fas fa-shopping-cart mr-2"></i>
+                        В корзину
+                    </button>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Пустое состояние -->
+    {% if not products %}
+    <div class="text-center py-12">
+        <div class="mx-auto h-12 w-12 text-gray-400 mb-4">
+            <i class="fas fa-box-open text-4xl"></i>
+        </div>
+        <h3 class="text-lg font-medium text-gray-900 mb-2">Товары не найдены</h3>
+        <p class="text-gray-500 text-sm sm:text-base">Попробуйте изменить параметры поиска или фильтры</p>
+    </div>
+    {% endif %}
+</div>
+
+<script>
+function addToCart(productId, buttonElement) {
+    // Показываем индикатор загрузки
+    const button = buttonElement || document.querySelector(`button[onclick*="${productId}"]`);
+    const originalText = button.innerHTML;
+    button.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Добавление...';
+    button.disabled = true;
+    
+    fetch('/api/shop/cart/add-form', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: `product_id=${productId}&quantity=1`
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        return response.json();
+    })
+    .then(data => {
+        if (data.success) {
+            // Показать уведомление об успехе
+            showNotification('Товар добавлен в корзину!', 'success');
+            
+            // Обновить счетчик корзины если он есть
+            const cartCounter = document.getElementById('cart-counter');
+            if (cartCounter) {
+                const currentCount = parseInt(cartCounter.textContent) || 0;
+                cartCounter.textContent = currentCount + 1;
+            }
+        } else {
+            showNotification(data.message || 'Ошибка при добавлении товара', 'error');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        showNotification('Ошибка при добавлении товара: ' + error.message, 'error');
+    })
+    .finally(() => {
+        // Восстанавливаем кнопку
+        button.innerHTML = originalText;
+        button.disabled = false;
+    });
+}
+
+function showNotification(message, type) {
+    // Создаем уведомление
+    const notification = document.createElement('div');
+    notification.className = `fixed top-4 right-4 z-50 p-4 rounded-md shadow-lg transition-all duration-300 transform translate-x-full ${
+        type === 'success' ? 'bg-green-500 text-white' : 'bg-red-500 text-white'
+    }`;
+    notification.textContent = message;
+    
+    // Добавляем в DOM
+    document.body.appendChild(notification);
+    
+    // Показываем
+    setTimeout(() => {
+        notification.classList.remove('translate-x-full');
+    }, 100);
+    
+    // Скрываем через 3 секунды
+    setTimeout(() => {
+        notification.classList.add('translate-x-full');
+        setTimeout(() => {
+            document.body.removeChild(notification);
+        }, 300);
+    }, 3000);
+}
+</script>
+{% endblock %}
