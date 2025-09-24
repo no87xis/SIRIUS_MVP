@@ -12,5 +12,6 @@ pydantic-settings==2.0.3
 itsdangerous==2.1.2
 # qrcode==8.2.0  # ОТКЛЮЧЕН: вызывает префикс "qс" в терминале
 pillow==11.3.0
-psycopg2-binary==2.9.9
+# PostgreSQL client (устанавливается только для Python < 3.13, иначе пропускается)
+psycopg2-binary==2.9.9; python_version < "3.13"
 watchfiles==0.21.0

@@ -200,25 +200,25 @@ def update_order_status(db: Session, order_id: int, status_data: OrderStatusUpda
     # ЛОГИКА УМЕНЬШЕНИЯ ОСТАТКОВ:
     # Уменьшаем остаток только при переходе на статус "оплачен" или "выдан"
     # и только для заказов из магазина (source="shop")
-    if (order.source == "shop" and 
-        old_status in [OrderStatus.PAID_NOT_ISSUED, OrderStatus.UNPAID] and
-        new_status in [OrderStatus.PAID_NOT_ISSUED, OrderStatus.PAID_ISSUED]):
-        
-        # Получаем товар
+    if (
+        order.source == "shop"
+        and old_status in [OrderStatus.PAID_NOT_ISSUED, OrderStatus.UNPAID]
+        and new_status in [OrderStatus.PAID_NOT_ISSUED, OrderStatus.PAID_ISSUED]
+    ):
+        # Получаем товар и уменьшаем остаток
         product = db.query(Product).filter(Product.id == order.product_id).first()
         if product:
-            # Уменьшаем остаток
             product.quantity = max(0, product.quantity - order.qty)
-    
-        # Если заказ отменяется или переводится в "не оплачен", возвращаем остаток
-        if (order.source == "shop" and 
-            old_status in [OrderStatus.PAID_NOT_ISSUED, OrderStatus.PAID_ISSUED] and
-            new_status in [OrderStatus.UNPAID, OrderStatus.COURIER_NOT_PAID]):
-        
-        # Получаем товар
+
+    # Если заказ отменяется или переводится в "не оплачен", возвращаем остаток
+    if (
+        order.source == "shop"
+        and old_status in [OrderStatus.PAID_NOT_ISSUED, OrderStatus.PAID_ISSUED]
+        and new_status in [OrderStatus.UNPAID, OrderStatus.COURIER_NOT_PAID]
+    ):
+        # Получаем товар и возвращаем остаток
         product = db.query(Product).filter(Product.id == order.product_id).first()
         if product:
-            # Возвращаем остаток
             product.quantity += order.qty
     
     db.commit()

@@ -127,7 +127,12 @@ async def health_check():
         # Быстрая проверка БД с таймаутом
         await asyncio.wait_for(
             asyncio.get_event_loop().run_in_executor(
-                None, lambda: engine.execute(text("SELECT 1"))
+                None,
+                lambda: (
+                    (lambda conn: (conn.execute(text("SELECT 1")), conn.close()))(
+                        engine.connect()
+                    )
+                )
             ),
             timeout=2.0  # 2 секунды таймаут
         )

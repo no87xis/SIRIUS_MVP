@@ -66,6 +66,7 @@ async def shop_admin_order_detail(
     # Генерируем QR-код если его нет
     if not order.has_qr:
         # MVP: QR-генерация отключена
+        pass
     
     return templates.TemplateResponse("shop/admin/order-detail.html", {
         "request": request,
