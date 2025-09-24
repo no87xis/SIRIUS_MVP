@@ -9,7 +9,6 @@ from .config import settings
 from .db import engine, Base, get_db, close_db_connections
 from .services.auth import get_current_user_optional
 from .services.logger import logger
-from .services.admin import ensure_default_admin
 
 # Ленивые импорты роутеров для быстрого старта (MVP: без QR и уведомлений)
 def _import_routers():
@@ -55,8 +54,7 @@ async def startup_event():
             ),
             timeout=settings.startup_timeout
         )
-        # Гарантируем наличие дефолтного администратора
-        await asyncio.get_event_loop().run_in_executor(None, ensure_default_admin)
+        # Авто‑создание админа отключено по запросу
         
         # Ленивая загрузка роутеров
         routers = _import_routers()

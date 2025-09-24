@@ -6,7 +6,6 @@ from decimal import Decimal
 from ..models import User, OperationLog, UserRole
 from ..schemas.user import UserUpdate, UserCreate
 from ..services.auth import get_password_hash
-from ..db import get_db_sync
 
 def get_users(db: Session, skip: int = 0, limit: int = 100) -> List[User]:
     """Получить список всех пользователей"""
@@ -61,28 +60,7 @@ def delete_user(db: Session, username: str) -> bool:
     return True
 
 
-def ensure_default_admin() -> None:
-    """Создаёт администратора admin/admin123, если отсутствует.
-
-    Безопасно для повторных запусков: если пользователь существует, ничего не делает.
-    """
-    db = get_db_sync()
-    try:
-        existing = get_user_by_username(db, "admin")
-        if existing:
-            return
-        hashed = get_password_hash("admin123")
-        admin_user = User(
-            username="admin",
-            hashed_password=hashed,
-            role=UserRole.ADMIN,
-            is_active=True,
-            is_superuser=True,
-        )
-        db.add(admin_user)
-        db.commit()
-    finally:
-        db.close()
+# ensure_default_admin удалён по запросу
 
 def get_user_statistics(db: Session) -> Dict[str, Any]:
     """Получить статистику по пользователям"""
