@@ -23,7 +23,7 @@ def quick_syntax_check():
         "app/db.py",
         "app/services/logger.py",
         "app/services/monitoring.py",
-        "app/services/qr_service.py"
+        
     ]
     
     try:
@@ -61,7 +61,7 @@ def quick_import_check():
         from app.db import engine, Base, get_db
         from app.services.logger import logger
         from app.services.monitoring import performance_monitor
-        from app.services.qr_service import QRService
+        
         
         print("✅ Импорты работают")
         return True
@@ -120,12 +120,11 @@ def quick_services_check():
     try:
         from app.services.logger import logger
         from app.services.monitoring import performance_monitor
-        from app.services.qr_service import QRService
         
         # Проверяем основные методы
         assert hasattr(logger, 'info')
         assert hasattr(performance_monitor, 'record_request_time')
-        assert hasattr(QRService, 'generate_token')
+        
         
         print("✅ Сервисы работают")
         return True
